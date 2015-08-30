@@ -1,0 +1,30 @@
+Third and final C++/SFML assignment
+
+The third and final C++/SFML assignment is to reimplement the game Flappy Bird, with a few
+twists (see below). The two games so far have had fixed screens -- Flappy Bird has a scrolling
+screen. 
+
+ 
+
+Your version of Flappy Bird must have:
+
+ 
+
+* Flappy Bird title screen
+
+* Instruction screen when you start playing
+
+* While your version of the game doesn't have to have exactly the same challenges as the
+original, it does need to present the same challenge to player, play after play. That is, the 
+ind of tubes, size of tubes, and location of tubes must be the same from game to game. No
+random generation on each playthrough. Part of the implementation challenge is representing
+these tubes and their locations, and then getting them on screen at the appropriate time.
+
+* Game over screen
+
+* Very similar flappy bird behavior -- quick rise up, heavy gravity, fast forward progress
+
+ 
+
+This is due Friday, September 11, with the same deliverables as always, YouTube video and Code
+on Github.
