@@ -39,8 +39,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="Bird.cpp" />
+		<Unit filename="Bird.h" />
+		<Unit filename="FlappyBirds.cpp" />
 		<Unit filename="cb.bmp" />
-		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
