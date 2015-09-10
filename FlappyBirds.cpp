@@ -125,6 +125,10 @@ int main()
                 }
                 else if(scoreS.isPressed()){
                     gameState = 1;
+                    scoreS.setActivated(false);
+                    play.mouseClick(window);
+                    scoreS.mouseClick(window);
+                    backS.mouseClick(window);
                 }
                 else{
                     //draw text
@@ -169,6 +173,10 @@ int main()
                     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up) gameState = 2;
                 }
                 else if(backS.isPressed()){
+                    backS.setActivated(false);
+                    play.mouseClick(window);
+                    backS.mouseClick(window);
+                    scoreS.mouseClick(window);
                     gameState = 0;
                 }
                 else{

@@ -9,6 +9,7 @@ using namespace std;
 class Bird{
     private:
         sf::Sprite bird;
+        int bestScore; //this is the best score saved for the user in the game loop a temp score variable is used
     public:
         Bird(float xPos, float yPos, sf::Texture& bd);
         ~Bird(){cout << "The Bird is down" << endl;}
