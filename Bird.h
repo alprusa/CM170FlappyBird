@@ -13,6 +13,7 @@ class Bird{
         Bird(float xPos, float yPos, sf::Texture& bd);
         ~Bird(){cout << "The Bird is down" << endl;}
         void moveBird(float xP, float yP){bird.move(xP,yP);}
+        void rotateBird(string degree);
 
         sf::Sprite getBird(){return bird;}
         float getX(){return bird.getPosition().x;}
