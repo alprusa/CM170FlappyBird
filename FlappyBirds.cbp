@@ -41,7 +41,11 @@
 		</Compiler>
 		<Unit filename="Bird.cpp" />
 		<Unit filename="Bird.h" />
+		<Unit filename="ButtonSprites.cpp" />
+		<Unit filename="ButtonSprites.h" />
 		<Unit filename="FlappyBirds.cpp" />
+		<Unit filename="PipesGenerator.cpp" />
+		<Unit filename="PipesGenerator.h" />
 		<Unit filename="cb.bmp" />
 		<Extensions>
 			<code_completion />

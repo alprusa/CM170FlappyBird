@@ -10,13 +10,12 @@ class Buttons{
     private:
         sf::Sprite button;
         bool pressed;
-        bool activated;
     public:
         Buttons(float xPos, float yPos, sf::Texture& bt);
         ~Buttons(){cout << "Buttons Gone" << endl;}
 
         void mouseClick(sf::RenderWindow& window);
-        void setActivated(bool act){activated = act;}
+        void setPressed(bool press){pressed = press;}
 
         sf::Sprite getButton(){return button;}
         bool isPressed(){return pressed;}
