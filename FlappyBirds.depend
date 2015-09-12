@@ -6,7 +6,7 @@
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442023786 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
+1442046060 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
 	<SFML/Graphics.hpp>
 	<sstream>
 	"Bird.h"
@@ -20,10 +20,10 @@
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442014217 /home/aprusa/Documents/FlappyBirds/PipesGenerator.h
+1442048886 /home/aprusa/Documents/FlappyBirds/PipesGenerator.h
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442023738 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
+1442048359 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
 	"PipesGenerator.h"
 
