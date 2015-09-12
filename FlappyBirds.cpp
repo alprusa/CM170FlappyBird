@@ -70,7 +70,7 @@ int main()
     sf::Texture pipeTexture;
     if (!pipeTexture.loadFromFile("FlappyPipe.png"))
         return EXIT_FAILURE;
-    Pipes pi(350, 400, pipeTexture);
+    Pipes pi(650, 400, pipeTexture);
 
     // Load a texture to display for play button sprite
     sf::Texture playTexture;
@@ -236,40 +236,34 @@ int main()
 
                 //making the bird move up
                 if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector()){
-                    bird.moveBird(0,-60);
+                    bird.moveBird(true);
                     bird.rotateBird("up");
                     tap = false;
                 }
                 //temp gravity
                 else {
-
-                    bird.moveBird(0,5);
+                    bird.moveBird(false);
+                    bird.rotateBird("down");
                 }
 
                 //make it so player must repeatedly tap up
-                if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Up && !bird.getLifeDetector()) {
-                    tap = true;
-                    bird.rotateBird("down");
-                }
+                if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Up && !bird.getLifeDetector() && !tap) tap = true;
 
                 //Draw the backgroud Sprite
                 window.draw(backgroundS);
 
                 //draw the pipes
-                for(unsigned i = 0; i < pi.getSize(); ++i){
+                for(unsigned i = 0; i < pi.getSize() && backgroundClockSet.getElapsedTime().asSeconds() < 1; ++i){
                     //determine if the bird collided with the pipes
-                    if(bird.getBird().getGlobalBounds().intersects(pi.getPipes(0)[i].getGlobalBounds())) {
-                        bird.moveBird(0,40);
-                        bird.rotateBird("dead");
-                    }
+                    if(bird.getBird().getGlobalBounds().intersects(pi.getPipes(0,i).getGlobalBounds())) bird.rotateBird("dead");
 
                     if(bird.getBird().getGlobalBounds().contains(pi.getPipesX(i),250.0f)) tempScore++; //set y to be the y point of the gap between pipes
 
-                    if(pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()) //make it so that pipes off screen aren't draw
-                        window.draw(pi.getPipes(-1000 * backgroundClockSet.getElapsedTime().asSeconds())[i]); //both moves the pipes and draws the new positions
+                    if(pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector())//make it so that pipes off screen aren't draw
+                        window.draw(pi.getPipes(-10000 * backgroundClockSet.getElapsedTime().asSeconds(),i)); //both moves the pipes and draws the new positions
                     else if(pi.getPipesX(i) > 1000 && !bird.getLifeDetector()) //still move pipes that are still needing to be drawn once the bird has "move forward" enough
-                        pi.getPipes(-1000 * backgroundClockSet.getElapsedTime().asSeconds())[i];
-                    else if(bird.getLifeDetector() && pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000) window.draw(pi.getPipes(0)[i]);
+                        pi.getPipes(-10000 * backgroundClockSet.getElapsedTime().asSeconds(),i);
+                    else if(bird.getLifeDetector() && pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000) window.draw(pi.getPipes(0,i)); //bird is dead
                 }
 
                 // Draw the sprite
@@ -278,7 +272,7 @@ int main()
                 //to reset the game conditions needs to be changed
                 if(bird.getBird().getPosition().y > screenSize.y){
                     backgroundS.setTextureRect(sf::IntRect(0,0,screenSize.x,screenSize.y));
-                    pi.resetPipes(350, 400, pipeTexture);
+                    pi.resetPipes(650, 400, pipeTexture);
                     bird.resetBird(150,200,birdTexture);
                     bird.setScore(tempScore);
                     tap = false;

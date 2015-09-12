@@ -14,7 +14,7 @@ class Pipes{
         ~Pipes(){cout << "No more Pipes" << endl;}
         void resetPipes(float xPos, float yPos, sf::Texture& pi);
 
-        vector<sf::Sprite> getPipes(float speed);
+        sf::Sprite getPipes(float speed, int index);
         unsigned getSize(){return pipes.size();}
         float getPipesX(int index){return pipes[index].getPosition().x;}
         float getPipesY(int index){return pipes[index].getPosition().y;}
