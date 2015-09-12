@@ -70,7 +70,7 @@ int main()
     sf::Texture pipeTexture;
     if (!pipeTexture.loadFromFile("FlappyPipe.png"))
         return EXIT_FAILURE;
-    Pipes pi(650, 400, pipeTexture);
+    Pipes pi(650, 401, pipeTexture);
 
     // Load a texture to display for play button sprite
     sf::Texture playTexture;
@@ -235,13 +235,13 @@ int main()
                 backgroundS.setTextureRect(sf::IntRect(backScrollX,0,screenSize.x,screenSize.y));
 
                 //making the bird move up
-                if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector()){
+                if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector() && bird.getY() > 0){
                     bird.moveBird(true);
                     bird.rotateBird("up");
                     tap = false;
                 }
                 //temp gravity
-                else {
+                else if(bird.getY() <= screenSize.y){
                     bird.moveBird(false);
                     bird.rotateBird("down");
                 }
@@ -255,9 +255,24 @@ int main()
                 //draw the pipes
                 for(unsigned i = 0; i < pi.getSize() && backgroundClockSet.getElapsedTime().asSeconds() < 1; ++i){
                     //determine if the bird collided with the pipes
-                    if(bird.getBird().getGlobalBounds().intersects(pi.getPipes(0,i).getGlobalBounds())) bird.rotateBird("dead");
+                    sf::FloatRect bBox = bird.getBird().getGlobalBounds();
+                    sf::FloatRect pBox = pi.getPipes(0,i).getGlobalBounds();
 
-                    if(bird.getBird().getGlobalBounds().contains(pi.getPipesX(i),250.0f)) tempScore++; //set y to be the y point of the gap between pipes
+                    if(bBox.intersects(pBox)) bird.rotateBird("dead");
+
+                    //get the center y position for where bird needs to hit
+                    sf::Vector2f yPasses(0,0);
+                    if(pi.getRotation(i) == 0) {
+                        yPasses.x = pi.getPipesY(i) - 10;
+                        yPasses.y = 0;
+                    }
+                    else {
+                        yPasses.x = pi.getPipesY(i) + 10;
+                        yPasses.y = screenSize.y;
+                    }
+                    sf::FloatRect scoreZone(pi.getPipesX(i), yPasses.x, pi.getPipes(0,i).getScale().x, yPasses.y);
+
+                    if(bBox.intersects(scoreZone)) tempScore++; //set y to be the y point of the gap between pipes
 
                     if(pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector())//make it so that pipes off screen aren't draw
                         window.draw(pi.getPipes(-10000 * backgroundClockSet.getElapsedTime().asSeconds(),i)); //both moves the pipes and draws the new positions
@@ -269,10 +284,15 @@ int main()
                 // Draw the sprite
                 window.draw(bird.getBird());
 
+                //draw score
+                //convert score to string for temp
+                string scoreStr = convertInt(tempScore);
+                createText(300,50, true, stdFont, window, scoreStr); //text for score
+
                 //to reset the game conditions needs to be changed
-                if(bird.getBird().getPosition().y > screenSize.y){
+                if(bird.getBird().getPosition().y >= screenSize.y){
                     backgroundS.setTextureRect(sf::IntRect(0,0,screenSize.x,screenSize.y));
-                    pi.resetPipes(650, 400, pipeTexture);
+                    pi.resetPipes(650, 401, pipeTexture);
                     bird.resetBird(150,200,birdTexture);
                     bird.setScore(tempScore);
                     tap = false;
