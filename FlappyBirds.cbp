@@ -43,6 +43,8 @@
 		<Unit filename="Bird.h" />
 		<Unit filename="ButtonSprites.cpp" />
 		<Unit filename="ButtonSprites.h" />
+		<Unit filename="CollisionDetection.cpp" />
+		<Unit filename="CollisionDetection.h" />
 		<Unit filename="FlappyBirds.cpp" />
 		<Unit filename="PipesGenerator.cpp" />
 		<Unit filename="PipesGenerator.h" />

@@ -10,6 +10,8 @@ class Bird{
     private:
         sf::Sprite bird;
         int bestScore;
+        int width;
+        int height;
         bool dead;
     public:
         Bird(float xPos, float yPos, sf::Texture& bd); //constructor
@@ -24,6 +26,8 @@ class Bird{
         float getY(){return bird.getPosition().y;} //get the current y position of the bird
         bool getLifeDetector(){return dead;}
         int getScore(){return bestScore;}
+        int getWidth(){return width;}
+        int getHeight(){return height;}
 };
 
 #endif

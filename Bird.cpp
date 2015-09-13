@@ -1,6 +1,9 @@
 #include "Bird.h"
 
 Bird::Bird(float xPos, float yPos, sf::Texture& bd){
+    width = bd.getSize().x * 0.1;
+    height = bd.getSize().y * 0.1;
+    dead = false;
     bestScore = 0;
     bird = sf::Sprite(bd);
     bird.setScale(0.1f,0.1f);

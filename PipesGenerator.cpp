@@ -1,25 +1,56 @@
 #include "PipesGenerator.h"
+#include "CollisionDetection.h"
+
+int determineYPos(int yPos, sf::Sprite& pipeTemp){
+        //so that the pipe won't go to low
+        if(yPos >= 600 && pipeTemp.getRotation() == 0) {
+            int difference = yPos - 600;
+            yPos -= difference;
+        }
+
+        //so that the pipe does not float
+        else if(yPos <= 340 && pipeTemp.getRotation() == 0){
+            int difference = yPos - 340;
+            yPos += difference;
+        }
+
+        //so the pipe doesn't go too high
+        if(yPos <= -280 && pipeTemp.getRotation() == 180){
+            int difference = 280 + yPos;
+            yPos -= difference;
+            yPos = -yPos;
+        }
+
+        //so the pipe doesn't exceed the length of the pipe
+        else if(yPos >= 280  && pipeTemp.getRotation() == 180){
+            int difference = yPos - 280;
+            yPos -= difference;
+        }
+
+        return yPos;
+}
 
 //return array of pipe sprites in generated function
 vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
     vector<sf::Sprite> pipes;
-    sf::FloatRect prevBoundingBox;
+    int width = pi.getSize().x;
+    int height = pi.getSize().y;
 
     //create the vector sprite set
-    for(int i = 0; i < 999; i++) {
+    for(int i = 0; i < 2000; i++) {
         sf::Sprite pipeTemp;
         pipeTemp.setTexture(pi);
-        if(i % 3 == 0 || i % 5 == 0) pipeTemp.rotate(180);
+        if(i % 2 == 0) pipeTemp.rotate(180);
 
         //to setup the different x positions
-        if(i % 5 != 0){
-            if(xPos % 3 == 0) xPos += (20+xPos/10); //set next yPos
-            else if(xPos % 4 == 0) xPos += (5+xPos/10);
-            else if(xPos % 5 == 0) xPos += (1+xPos/10);
-            else if(xPos % 6 == 0) xPos += (12+xPos/10);
-            else if(xPos > 300 && i < 400) xPos += (7+xPos/10);
-            else if(xPos > 400 && i < 550) xPos += (18+xPos/10);
-            else xPos += (25+xPos/10);
+        if(i % 2 == 0){
+            if(xPos % 3 == 0) xPos += (120+xPos/10); //set next yPos
+            else if(xPos % 4 == 0 && i >200) xPos += (50+xPos/10);
+            else if(xPos % 5 == 0 && i > 400) xPos += (40+xPos/10);
+            else if(xPos % 6 == 0) xPos += (212+xPos/10);
+            else if(xPos % 7 == 0 && i > 100) xPos += (70+xPos/10);
+            else if(xPos % 8 == 0) xPos += (180+xPos/10);
+            else xPos += (240+xPos/10);
         }
 
         //make it so pipes so above one another/have different heights
@@ -46,30 +77,8 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
             else yPos = (120+yPos/10);
         }
 
-        //so that the pipe won't go to low
-        if(yPos >= 600 && pipeTemp.getRotation() == 0) {
-            float difference = yPos - 600;
-            yPos -= difference;
-        }
-
-        //so that the pipe does not float
-        else if(yPos <= 360 && pipeTemp.getRotation() == 0){
-            float difference = yPos - 360;
-            yPos += difference;
-        }
-
-        //so the pipe doesn't go too high
-        if(yPos <= -280 && pipeTemp.getRotation() == 180){
-            float difference = 280 + yPos;
-            yPos -= difference;
-            yPos = -yPos;
-        }
-
-        //so the pipe doesn't exceed the length of the pipe
-        else if(yPos >= 280  && pipeTemp.getRotation() == 180){
-            float difference = yPos - 280;
-            yPos -= difference;
-        }
+        //correct yPos
+        yPos = determineYPos(yPos, pipeTemp);
 
         //force variance in pipes
         xPos++;
@@ -77,27 +86,39 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
 
         pipeTemp.setPosition(xPos, yPos);
 
-        //check if pipes on above one another
-        if(i != 0 && pipeTemp.getGlobalBounds().intersects(pipes[i-1].getGlobalBounds())){
+        //check if pipes are above one another
+        sf::Sprite tempPipeCollision;
+        tempPipeCollision.setTexture(pi);
+        tempPipeCollision.setPosition(xPos, yPos);
+
+        //change the positioning for the rotated pipes
+        if(i > 2 && i % 2 == 0) tempPipeCollision.setPosition(pipes[i-3].getPosition().x - width, pipes[i-3].getPosition().y - height);
+        else if(i > 1) tempPipeCollision.setPosition(pipes[i-3].getPosition().x, pipes[i-3].getPosition().y);
+
+        if(i % 2 == 0 && collisionCheck(pipeTemp, width, height, tempPipeCollision, width, height)){
             //for if intersection is on x axis
-            if(pipeTemp.getGlobalBounds().left < pipes[i-1].getGlobalBounds().left || pipeTemp.getGlobalBounds().left > pipes[i-1].getGlobalBounds().left){
-                xPos += 60;
-                pipeTemp.move(+60,0);
-            }
-            //for if intersection is on y axis
-            else if(pipeTemp.getRotation() == 0 && pipeTemp.getGlobalBounds().top == pipes[i-1].getGlobalBounds().top){
-                yPos += 50;
-                pipeTemp.move(0,50);
-            }
-            else{
-                yPos -= 50;
-                pipeTemp.move(0,-50);
-            }
+            //if(pipeTemp.getGlobalBounds().left < pipes[i-2].getGlobalBounds().left || pipeTemp.getGlobalBounds().left > pipes[i-2].getGlobalBounds().left){
+                xPos += 160;
+                pipeTemp.move(160,0);
+            //}
+        }
+
+        //for if intersection is on y axis correct y spacing
+        float pipeDistance = 0;
+        if(i != 0) pipeDistance = pipeTemp.getPosition().y - pipes[i-1].getPosition().y;
+        if(pipeTemp.getRotation() == 0 && pipeDistance < 60){
+            //if(pipeTemp.getGlobalBounds().top == pipes[i-1].getGlobalBounds().top)
+            cout<<"stuff"<<endl;
+            yPos += 50;
+            float tempYpos = yPos;
+            //determine yPos
+            yPos = determineYPos(yPos, pipeTemp);
+            float diff = 50;
+            if(tempYpos != yPos) diff = tempYpos - yPos;
+            pipeTemp.move(0,diff);
         }
 
         pipes.push_back(pipeTemp);
-
-        prevBoundingBox = pipeTemp.getGlobalBounds(); //prevent collisions with past pipes
     }
 
     return pipes;
@@ -105,17 +126,24 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
 
 //call generator here and just have the private object be the pipes sprite array not single sprite
 Pipes::Pipes(int xPos, int yPos, sf::Texture& pi){
-    timeElapsed = 0;
+    width = pi.getSize().x;
+    height = pi.getSize().y;
+
     pipes = pipeGen(xPos, yPos, pi);
+
+    for(int i = 0; i < 500; i++) passedThrough.push_back(false); //so that values are not counted twice
 }
 
 void Pipes::resetPipes(int xPos, int yPos, sf::Texture& pi){
     pipes = pipeGen(xPos, yPos, pi);
+
+    for(int i = 0; i < 500; i++) passedThrough.push_back(false); //so that values are not counted twice
 }
 
 //get the pipes so that they cab be drawn to the screen
-sf::Sprite Pipes::getPipes(float speed, int index){
+sf::Vector2<sf::Sprite> Pipes::getPipes(float speed, int index){
     float ySpeed = 0;//-0.5f;
+    int nextIndex = index+1;
 
     /*if((index > 3 && index < 10) || (index < 115 && index > 110)) {
         //to make moving pipes
@@ -129,13 +157,14 @@ sf::Sprite Pipes::getPipes(float speed, int index){
 
     pipes[index].move(speed, ySpeed);
 
-    return pipes[index];
+    if(nextIndex < pipes.size()) pipes[index+1].move(speed, ySpeed);
+    else nextIndex = index;
+
+    return sf::Vector2<sf::Sprite>(pipes[index], pipes[nextIndex]);
 }
 
 //fix the gravity/rise
 //fix the scroll look make it smooth
-//fix the score incrementor and make it happen when bird goes past pipe not just at 250px
 //change the bird sprite
 //fix the back/scoreboard button switch
-//if player exceeds 999 then create knew vector pipe set and and give different start pints
-//force a gap between each pipe by detecting the one sprite to the other and a 50 px gap must be between
+//fix moving pipes section

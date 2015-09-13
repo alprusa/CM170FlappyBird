@@ -3,6 +3,7 @@
 #include "Bird.h"
 #include "ButtonSprites.h"
 #include "PipesGenerator.h"
+#include "CollisionDetection.h"
 
 using namespace std;
 
@@ -103,8 +104,7 @@ int main()
     Buttons instructions(230,200,instTexture);
 
     //scrolling timer
-    sf::Clock backgroundClockSet;
-    float moveSpeed = 20000.0f; //scroll speed
+    float moveSpeed = 4.0f; //scroll speed
     int backScrollX = 0; //view scroller x direction
     int gameState = 0; //for checking if playing the game at the menu or game over states
     int tempScore = 0; //score that will be incremented as the bird flys through pipes
@@ -113,7 +113,6 @@ int main()
 	// Start the game loop
     while (window.isOpen())
     {
-        backgroundClockSet.restart();
         // Process events
         sf::Event event;
         while (window.pollEvent(event))
@@ -222,7 +221,7 @@ int main()
             default:{
                 //making the screen scroll by moving the background image horizontally
                 if(backScrollX < screenSize.x && !bird.getLifeDetector()) {
-                    backScrollX += (moveSpeed * backgroundClockSet.getElapsedTime().asSeconds());
+                    backScrollX += moveSpeed;
                 }
                 else{
                     backScrollX = 0;
@@ -253,32 +252,57 @@ int main()
                 window.draw(backgroundS);
 
                 //draw the pipes
-                for(unsigned i = 0; i < pi.getSize() && backgroundClockSet.getElapsedTime().asSeconds() < 1; ++i){
-                    //determine if the bird collided with the pipes
-                    sf::FloatRect bBox = bird.getBird().getGlobalBounds();
-                    sf::FloatRect pBox = pi.getPipes(0,i).getGlobalBounds();
+                for(unsigned i = 0; i < pi.getSize(); ++i){
+                    //determine if the bird collided with the pipes using a tempPipe for proper sizing
+                    sf::Sprite tempPipe;
+                    tempPipe.setTexture(pipeTexture);
 
-                    if(bBox.intersects(pBox)) bird.rotateBird("dead");
+                    //change the positioning for the rotated pipes
+                    if(i % 2 == 0) tempPipe.setPosition(pi.getPipesX(i) - pi.getWidth(), pi.getPipesY(i) - pi.getHeight());
+                    else tempPipe.setPosition(pi.getPipesX(i), pi.getPipesY(i));
+
+                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, pi.getWidth(), pi.getHeight())) bird.rotateBird("dead"); //fix collision then game it good enough for submission
 
                     //get the center y position for where bird needs to hit
                     sf::Vector2f yPasses(0,0);
+                    int tempWidth = 0;
+                    int tempHeight = 0;
+
+                    //for if the pipe faces up
                     if(pi.getRotation(i) == 0) {
                         yPasses.x = pi.getPipesY(i) - 10;
                         yPasses.y = 0;
+                        tempPipe.setPosition(pi.getPipesX(i), yPasses.y);
+                        tempWidth = pi.getWidth();
+                        tempHeight = yPasses.x;
                     }
-                    else {
+                    else { //for the pipe that faces down
                         yPasses.x = pi.getPipesY(i) + 10;
                         yPasses.y = screenSize.y;
+                        tempPipe.setPosition(pi.getPipesX(i), yPasses.x);
+                        tempWidth = pi.getWidth();
+                        tempHeight = yPasses.y;
                     }
-                    sf::FloatRect scoreZone(pi.getPipesX(i), yPasses.x, pi.getPipes(0,i).getScale().x, yPasses.y);
 
-                    if(bBox.intersects(scoreZone)) tempScore++; //set y to be the y point of the gap between pipes
+                    //to set the score when player passes the pipes
+                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, tempWidth, tempHeight) && !pi.getPassedStats(i )&& !bird.getLifeDetector() && i % 2 == 0) {
+                        pi.setPassedStats(i);
+                        tempScore++; //set y to be the y point of the gap between pipes
+                    }
 
-                    if(pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector())//make it so that pipes off screen aren't draw
-                        window.draw(pi.getPipes(-10000 * backgroundClockSet.getElapsedTime().asSeconds(),i)); //both moves the pipes and draws the new positions
-                    else if(pi.getPipesX(i) > 1000 && !bird.getLifeDetector()) //still move pipes that are still needing to be drawn once the bird has "move forward" enough
-                        pi.getPipes(-10000 * backgroundClockSet.getElapsedTime().asSeconds(),i);
-                    else if(bird.getLifeDetector() && pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000) window.draw(pi.getPipes(0,i)); //bird is dead
+                    //make it so that pipes off screen aren't drawn
+                    if(i % 2 == 0 && pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()){
+                        window.draw(pi.getPipes(-moveSpeed,i).x); //both moves the pipes and draws the new positions
+                        window.draw(pi.getPipes(2,i).y);//draw bottom pipe so there are two pipes per score zone
+                    }
+                    //still move pipes that are still needing to be drawn once the bird has "move forward" enough
+                    else if(i % 2 == 0 && pi.getPipesX(i) > 1000 && !bird.getLifeDetector())
+                        pi.getPipes(-moveSpeed,i);
+                    //bird is dead andd for transition
+                    else {
+                        window.draw(pi.getPipes(0,i).x);
+                        window.draw(pi.getPipes(0,i).y);
+                    }
                 }
 
                 // Draw the sprite
@@ -289,7 +313,7 @@ int main()
                 string scoreStr = convertInt(tempScore);
                 createText(300,50, true, stdFont, window, scoreStr); //text for score
 
-                //to reset the game conditions needs to be changed
+                //to reset the game conditions may need to be changed
                 if(bird.getBird().getPosition().y >= screenSize.y){
                     backgroundS.setTextureRect(sf::IntRect(0,0,screenSize.x,screenSize.y));
                     pi.resetPipes(650, 401, pipeTexture);
@@ -299,6 +323,9 @@ int main()
                     backScrollX = 0;
                     gameState = 1;
                 }
+
+                //to generate more pipes when player gets farther
+                //if(tempScore % 1000 == 0) pi.resetPipes(pi.getPipesX(tempScore)+50, 575, pipeTexture);
 
                 break;
             }

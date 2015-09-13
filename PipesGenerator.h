@@ -9,18 +9,23 @@ using namespace std;
 class Pipes{
     private:
         vector<sf::Sprite> pipes;
-        float timeElapsed;
+        vector<bool> passedThrough;
+        int width;
+        int height;
     public:
         Pipes(int xPos, int yPos, sf::Texture& pi);
         ~Pipes(){cout << "No more Pipes" << endl;}
         void resetPipes(int xPos, int yPos, sf::Texture& pi);
-        void increaseTime(){timeElapsed++;}
+        void setPassedStats(int index){passedThrough[index] = true;}
 
-        sf::Sprite getPipes(float speed, int index);
+        sf::Vector2<sf::Sprite> getPipes(float speed, int index);
         unsigned getSize(){return pipes.size();}
         float getPipesX(int index){return pipes[index].getPosition().x;}
         float getPipesY(int index){return pipes[index].getPosition().y;}
         float getRotation(int index){return pipes[index].getRotation();}
+        bool getPassedStats(int index){return passedThrough[index];}
+        int getWidth(){return width;}
+        int getHeight(){return height;}
 };
 
 #endif
