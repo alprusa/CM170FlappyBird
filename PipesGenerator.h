@@ -19,7 +19,7 @@ class Pipes{
         void resetPipes(int xPos, int yPos);
         void setPassedStats(int index){passedThrough[index] = true;}
 
-        sf::Vector2<sf::Sprite> getPipes(float speed, int index);
+        sf::Sprite getPipes(float speed, int index);
         unsigned getSize(){return pipes.size();}
         float getPipesX(int index){return pipes[index].getPosition().x;}
         float getPipesY(int index){return pipes[index].getPosition().y;}

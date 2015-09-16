@@ -1,18 +1,21 @@
 # depslib dependency file v1.0
-1442388499 source:/home/aprusa/Documents/FlappyBirds/Bird.cpp
+1442397140 source:/home/aprusa/Documents/FlappyBirds/Bird.cpp
 	"Bird.h"
 
-1442388499 /home/aprusa/Documents/FlappyBirds/Bird.h
+1442397140 /home/aprusa/Documents/FlappyBirds/Bird.h
 	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
 	<iostream>
 
-1442388700 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
+1442399611 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
 	<SFML/Graphics.hpp>
+	<SFML/Audio.hpp>
 	<sstream>
 	"Bird.h"
 	"ButtonSprites.h"
 	"PipesGenerator.h"
 	"CollisionDetection.h"
+	"Background.h"
 
 1442391017 source:/home/aprusa/Documents/FlappyBirds/ButtonSprites.cpp
 	"ButtonSprites.h"
@@ -21,11 +24,11 @@
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442388626 /home/aprusa/Documents/FlappyBirds/PipesGenerator.h
+1442399768 /home/aprusa/Documents/FlappyBirds/PipesGenerator.h
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442388709 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
+1442399491 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
 	"PipesGenerator.h"
 	"CollisionDetection.h"
 

@@ -145,30 +145,28 @@ void Pipes::resetPipes(int xPos, int yPos){
 }
 
 //get the pipes so that they cab be drawn to the screen
-sf::Vector2<sf::Sprite> Pipes::getPipes(float speed, int index){
+sf::Sprite Pipes::getPipes(float speed, int index){
     float ySpeed = 0;//-0.5f;
-    int nextIndex = index+1;
 
+    //to make moving pipes
     /*if((index > 3 && index < 10) || (index < 115 && index > 110)) {
-        //to make moving pipes
-        cout<<speed<<endl;
-        if(speed < -2){
+        //so that the pipe won't go to low
+        if(index % 2 != 0 && pipes[index].getPosition().y <= 360) {
             ySpeed = -ySpeed;
-            timeElapsed = 0;
+        }
+
+        if(index % 2 != 0 && pipes[index].getPosition().y >= 600) {
+            ySpeed = -ySpeed;
         }
     }
     else ySpeed = 0;*/
 
 
     pipes[index].move(speed, ySpeed);
-    if(nextIndex < pipes.size()) nextIndex = index+1;//pipes[nextIndex].move(speed, ySpeed);
-    else nextIndex = index;
 
-    return sf::Vector2<sf::Sprite>(pipes[index], pipes[nextIndex]);
+    return pipes[index];
 }
 
-//fix the gravity/rise
 //fix the scroll look make it smooth
-//change the bird sprite
-//fix the back/scoreboard button switch
 //fix moving pipes section
+//get moving pipes working

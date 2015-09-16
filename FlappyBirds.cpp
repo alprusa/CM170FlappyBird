@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <sstream>
 #include "Bird.h"
 #include "ButtonSprites.h"
@@ -38,12 +39,12 @@ int main()
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(screenSize.x, screenSize.y), "SFML window");
 
-    //set background audio
-    /*sf::SoundBuffer buf3;
-    if(!buf3.loadFromFile("bird.wav")) return -1;
-    sf::Sound sndAudioE;
-    sndAudio.setBuffer(buf);
-    sndAudioE.play();*/
+    //set bird flap audio audio
+    sf::SoundBuffer flapBuf;
+    if(!flapBuf.loadFromFile("paper-sheet-pick-up-01.wav")) return -1;
+    sf::Sound flapAudio;
+    flapAudio.setBuffer(flapBuf);
+    flapAudio.setLoop(false);
 
     //Font for Start Screen and such
     sf::Font stdFont;
@@ -54,6 +55,8 @@ int main()
 
     //the flappy bird sprite
     Bird bird(150,200);
+    //set bird to stationary position
+    bird.rotateBird("forward");
 
     //Making the pipes
     Pipes pi(650, 401);
@@ -74,6 +77,7 @@ int main()
     Buttons instructions(230,200,"instructions");
 
     //scrolling timer
+    sf::Clock buttonToggleTimer; //for correct toggle for back/score buttons
     float moveSpeed = 4.0f; //scroll speed
     int gameState = 0; //for checking if playing the game at the menu or game over states
     int tempScore = 0; //score that will be incremented as the bird flys through pipes
@@ -96,13 +100,12 @@ int main()
 
         switch(gameState){
             case 0:{
-                //set bird to stationary position
-                bird.rotateBird("forward");
-
                 //Draw the backgroud Sprite
                 window.draw(backG.getBackground());
+
                 // Draw the sprite
                 window.draw(bird.getBird());
+                bird.animate();
 
                 //determine if player is clicking on play sprite
                 if(play.isPressed()) {
@@ -116,12 +119,13 @@ int main()
                         play.setPressed(false);
                     }
                 }
-                else if(scoreS.isPressed()){
+                else if(scoreS.isPressed() && buttonToggleTimer.getElapsedTime().asSeconds() * 1000 > 100){
                     gameState = 1;
                     scoreS.setPressed(false);
                     play.mouseClick(window);
                     scoreS.mouseClick(window);
                     backS.mouseClick(window);
+                    buttonToggleTimer.restart();
                 }
                 else{
                     //draw text
@@ -144,13 +148,12 @@ int main()
                 //for best score
                 string scoreBestStr = convertInt(bird.getScore());
 
-                //set bird to stationary position
-                bird.rotateBird("forward");
-
                 //Draw the backgroud Sprite
                 window.draw(backG.getBackground());
+
                 // Draw the sprite
                 window.draw(bird.getBird());
+                bird.animate();
 
                 //determine if player is clicking on play sprite
                 if(play.isPressed()) {
@@ -163,12 +166,13 @@ int main()
                         play.setPressed(false);
                     }
                 }
-                else if(backS.isPressed()){
+                else if(backS.isPressed() && buttonToggleTimer.getElapsedTime().asSeconds() * 1000 > 100){
                     backS.setPressed(false);
                     play.mouseClick(window);
                     backS.mouseClick(window);
                     scoreS.mouseClick(window);
                     gameState = 0;
+                    buttonToggleTimer.restart();
                 }
                 else{
                     //draw scoreBoard
@@ -191,19 +195,17 @@ int main()
                 //move background
                 backG.move(bird.getLifeDetector());
 
-                if(!bird.getLifeDetector()) bird.rotateBird("forward");
-                else bird.rotateBird("dead");
-
+                if(bird.getLifeDetector())
+                    bird.moveBird(false, "dead");
                 //making the bird move up
-                if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector() && bird.getY() > 0){
-                    bird.moveBird(true);
-                    bird.rotateBird("up");
+                else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector() && bird.getY() > 0){
+                    bird.moveBird(true, "up");
+                    flapAudio.play();
                     tap = false;
                 }
                 //temp gravity
-                else if(bird.getY() <= screenSize.y && tap){
-                    bird.moveBird(false);
-                    bird.rotateBird("down");
+                else if(bird.getY() <= screenSize.y && tap && !bird.getLifeDetector()){
+                    bird.moveBird(false, "down");
                 }
 
                 //make it so player must repeatedly tap up
@@ -222,7 +224,8 @@ int main()
                     if(i % 2 == 0) tempPipe.setPosition(pi.getPipesX(i) - pi.getWidth(), pi.getPipesY(i) - pi.getHeight());
                     else tempPipe.setPosition(pi.getPipesX(i), pi.getPipesY(i));
 
-                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, pi.getWidth(), pi.getHeight())) bird.rotateBird("dead"); //fix collision then game it good enough for submission
+                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, pi.getWidth(), pi.getHeight()) && !bird.getLifeDetector())
+                        bird.rotateBird("dead"); //fix collision then game it good enough for submission
 
                     //get the center y position for where bird needs to hit
                     sf::Vector2f yPasses(0,0);
@@ -246,28 +249,30 @@ int main()
                     }
 
                     //to set the score when player passes the pipes
-                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, tempWidth, tempHeight) && !pi.getPassedStats(i)&& !bird.getLifeDetector() && i % 2 == 0) {
+                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, tempWidth, tempHeight) && !pi.getPassedStats(i) &&
+                            !bird.getLifeDetector() && i % 2 == 0) {
                         pi.setPassedStats(i);
                         tempScore++; //set y to be the y point of the gap between pipes
                     }
 
                     //make it so that pipes off screen aren't drawn
-                    if(/*i%2==0*/pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()){
-                        window.draw(pi.getPipes(-moveSpeed,i).x); //both moves the pipes and draws the new positions
+                    if(pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()){
+                        window.draw(pi.getPipes(-moveSpeed,i)); //both moves the pipes and draws the new positions
                         //window.draw(pi.getPipes(0,i).y);//draw bottom pipe so there are two pipes per score zone
                     }
                     //still move pipes that are still needing to be drawn once the bird has "move forward" enough
-                    else if(/*i%2==0*/pi.getPipesX(i) >= 1000 && !bird.getLifeDetector())
+                    else if(pi.getPipesX(i) >= 1000 && !bird.getLifeDetector())
                         pi.getPipes(-moveSpeed,i);
                     //bird is dead andd for transition
                     else {
-                        window.draw(pi.getPipes(0,i).x);
+                        window.draw(pi.getPipes(0,i));
                         //window.draw(pi.getPipes(0,i).y);
                     }
                 }
 
                 // Draw the sprite
                 window.draw(bird.getBird());
+                bird.animate();
 
                 //draw score
                 //convert score to string for temp
@@ -280,6 +285,7 @@ int main()
                     pi.resetPipes(650, 401);
                     bird.resetBird(150,200);
                     bird.setScore(tempScore);
+                    bird.rotateBird("forward");
                     tap = false;
                     gameState = 1;
                 }
