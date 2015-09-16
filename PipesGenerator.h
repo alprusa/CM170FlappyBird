@@ -10,12 +10,13 @@ class Pipes{
     private:
         vector<sf::Sprite> pipes;
         vector<bool> passedThrough;
+        sf::Texture pipeTexture;
         int width;
         int height;
     public:
-        Pipes(int xPos, int yPos, sf::Texture& pi);
+        Pipes(int xPos, int yPos);
         ~Pipes(){cout << "No more Pipes" << endl;}
-        void resetPipes(int xPos, int yPos, sf::Texture& pi);
+        void resetPipes(int xPos, int yPos);
         void setPassedStats(int index){passedThrough[index] = true;}
 
         sf::Vector2<sf::Sprite> getPipes(float speed, int index);

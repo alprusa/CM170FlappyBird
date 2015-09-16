@@ -1,19 +1,25 @@
 #include "Bird.h"
 
-Bird::Bird(float xPos, float yPos, sf::Texture& bd){
-    width = bd.getSize().x * 0.1;
-    height = bd.getSize().y * 0.1;
+Bird::Bird(float xPos, float yPos){
+    // Load a texture to display for bird sprite
+    if (!birdTexture.loadFromFile("birdSpriteSheet.png"))
+        return;
+
+    width = birdTexture.getSize().x * 0.5;
+    height = birdTexture.getSize().y * 0.5;
     dead = false;
     bestScore = 0;
-    bird = sf::Sprite(bd);
-    bird.setScale(0.1f,0.1f);
+    bird = sf::Sprite(birdTexture);
+    bird.setScale(0.5f,0.5f);
     bird.setPosition(xPos,yPos);
+    bird.setTextureRect(sf::IntRect(0,0,92,64));
 }
 
-void Bird::resetBird(float xPos, float yPos, sf::Texture& bd){
-    bird = sf::Sprite(bd);
-    bird.setScale(0.1f,0.1f);
+void Bird::resetBird(float xPos, float yPos){
+    bird = sf::Sprite(birdTexture);
+    bird.setScale(0.5f,0.5f);
     bird.setPosition(xPos,yPos);
+    bird.setTextureRect(sf::IntRect(0,0,92,64));
     dead = false;
 }
 

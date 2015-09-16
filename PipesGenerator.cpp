@@ -81,7 +81,7 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
         yPos = determineYPos(yPos, pipeTemp);
 
         //force variance in pipes
-        xPos++;
+        if(i % 2 == 0) xPos++;
         yPos++;
 
         pipeTemp.setPosition(xPos, yPos);
@@ -92,10 +92,10 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
         tempPipeCollision.setPosition(xPos, yPos);
 
         //change the positioning for the rotated pipes
-        if(i > 2 && i % 2 == 0) tempPipeCollision.setPosition(pipes[i-3].getPosition().x - width, pipes[i-3].getPosition().y - height);
-        else if(i > 1) tempPipeCollision.setPosition(pipes[i-3].getPosition().x, pipes[i-3].getPosition().y);
+        if(i > 2 && i % 2 == 0) tempPipeCollision.setPosition(pipes[i-2].getPosition().x - width, pipes[i-2].getPosition().y - height);
+        else if(i > 2 && i % 2 != 0) tempPipeCollision.setPosition(pipes[i-2].getPosition().x, pipes[i-2].getPosition().y);
 
-        if(i % 2 == 0 && collisionCheck(pipeTemp, width, height, tempPipeCollision, width, height)){
+        if(i > 2 && i % 2 == 0 && collisionCheck(pipeTemp, width, height, tempPipeCollision, width, height)){
             //for if intersection is on x axis
             //if(pipeTemp.getGlobalBounds().left < pipes[i-2].getGlobalBounds().left || pipeTemp.getGlobalBounds().left > pipes[i-2].getGlobalBounds().left){
                 xPos += 160;
@@ -125,19 +125,23 @@ vector<sf::Sprite> pipeGen(int xPos, int yPos, sf::Texture& pi){
 }
 
 //call generator here and just have the private object be the pipes sprite array not single sprite
-Pipes::Pipes(int xPos, int yPos, sf::Texture& pi){
-    width = pi.getSize().x;
-    height = pi.getSize().y;
+Pipes::Pipes(int xPos, int yPos){
+    //load texture
+    if (!pipeTexture.loadFromFile("FlappyPipe.png"))
+        return;
 
-    pipes = pipeGen(xPos, yPos, pi);
+    width = pipeTexture.getSize().x;
+    height = pipeTexture.getSize().y;
 
-    for(int i = 0; i < 500; i++) passedThrough.push_back(false); //so that values are not counted twice
+    pipes = pipeGen(xPos, yPos, pipeTexture);
+
+    for(int i = 0; i < pipes.size()/2; i++) passedThrough.push_back(false); //so that values are not counted twice
 }
 
-void Pipes::resetPipes(int xPos, int yPos, sf::Texture& pi){
-    pipes = pipeGen(xPos, yPos, pi);
+void Pipes::resetPipes(int xPos, int yPos){
+    pipes = pipeGen(xPos, yPos, pipeTexture);
 
-    for(int i = 0; i < 500; i++) passedThrough.push_back(false); //so that values are not counted twice
+    for(int i = 0; i < pipes.size()/2; i++) passedThrough[i] = false; //so that values are not counted twice
 }
 
 //get the pipes so that they cab be drawn to the screen
@@ -155,9 +159,9 @@ sf::Vector2<sf::Sprite> Pipes::getPipes(float speed, int index){
     }
     else ySpeed = 0;*/
 
-    pipes[index].move(speed, ySpeed);
 
-    if(nextIndex < pipes.size()) pipes[index+1].move(speed, ySpeed);
+    pipes[index].move(speed, ySpeed);
+    if(nextIndex < pipes.size()) nextIndex = index+1;//pipes[nextIndex].move(speed, ySpeed);
     else nextIndex = index;
 
     return sf::Vector2<sf::Sprite>(pipes[index], pipes[nextIndex]);

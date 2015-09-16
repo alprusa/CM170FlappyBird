@@ -4,6 +4,7 @@
 #include "ButtonSprites.h"
 #include "PipesGenerator.h"
 #include "CollisionDetection.h"
+#include "Background.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ void createText(float xPos, float yPos, bool rightAligned, sf::Font stdFont, sf:
         createdText.setOrigin(createdText.getLocalBounds().width,0);
     createdText.setColor(sf::Color::Red);
     createdText.setPosition(xPos, yPos);
+
     window.draw(createdText);
 }
 
@@ -47,65 +49,32 @@ int main()
     sf::Font stdFont;
     if(!stdFont.loadFromFile("OpenSans-Regular.ttf")) return 1;
 
-    //scrolling background texture
-    sf::Texture backgroundText;
-    if(!backgroundText.loadFromFile("fbbackground.png"))
-        return -1;
-    backgroundText.setSmooth(true);
-    backgroundText.setRepeated(true);
+    //background sprite object
+    Background backG(0,0, screenSize);
 
-    //scrolling background sprite
-    sf::Sprite backgroundS;
-    backgroundS.setTexture(backgroundText);
-    backgroundS.setPosition(0,0);
-    backgroundS.setTextureRect(sf::IntRect(0,0,screenSize.x,screenSize.y));
-    backgroundS.setScale(1.0f, (float)screenSize.y/backgroundText.getSize().y);
+    //the flappy bird sprite
+    Bird bird(150,200);
 
-    // Load a texture to display for bird sprite
-    sf::Texture birdTexture;
-    if (!birdTexture.loadFromFile("FlappyBird.png"))
-        return EXIT_FAILURE;
-    Bird bird(150,200,birdTexture); //the flappy bird sprite
+    //Making the pipes
+    Pipes pi(650, 401);
 
-    //Making the pipes load texture
-    sf::Texture pipeTexture;
-    if (!pipeTexture.loadFromFile("FlappyPipe.png"))
-        return EXIT_FAILURE;
-    Pipes pi(650, 401, pipeTexture);
+    //sprite button to start playing
+    Buttons play(150,300,"play");
 
-    // Load a texture to display for play button sprite
-    sf::Texture playTexture;
-    if (!playTexture.loadFromFile("PlaySprite.png"))
-        return EXIT_FAILURE;
-    Buttons play(150,300,playTexture);
+    //sprite button to check scores
+    Buttons scoreS(350,300,"score");
 
-    // Load a texture to display for score button sprite
-    sf::Texture scoreTexture;
-    if (!scoreTexture.loadFromFile("ScoreSprite.png"))
-        return EXIT_FAILURE;
-    Buttons scoreS(350,300,scoreTexture);
+    //sprite button to go back from score menu
+    Buttons backS(350,300,"back");
 
-    // Load a texture to display for back button sprite
-    sf::Texture backTexture;
-    if (!backTexture.loadFromFile("BackSprite.png"))
-        return EXIT_FAILURE;
-    Buttons backS(350,300,backTexture);
+    //sprite for the score board menu screen
+    Buttons scoreBoard(220,150,"scoreBoard");
 
-    // Load a texture to display for scoreBoard screen sprite
-    sf::Texture scoreBoardTexture;
-    if (!scoreBoardTexture.loadFromFile("ScoreBoard.png"))
-        return EXIT_FAILURE;
-    Buttons scoreBoard(220,150,scoreBoardTexture);
-
-    // Load a texture to display for instructions screen sprite
-    sf::Texture instTexture;
-    if (!instTexture.loadFromFile("Instructions.png"))
-        return EXIT_FAILURE;
-    Buttons instructions(230,200,instTexture);
+    //sprite for the instructions screen
+    Buttons instructions(230,200,"instructions");
 
     //scrolling timer
     float moveSpeed = 4.0f; //scroll speed
-    int backScrollX = 0; //view scroller x direction
     int gameState = 0; //for checking if playing the game at the menu or game over states
     int tempScore = 0; //score that will be incremented as the bird flys through pipes
     bool tap = true; //make it so player must tap to up arrow
@@ -131,7 +100,7 @@ int main()
                 bird.rotateBird("forward");
 
                 //Draw the backgroud Sprite
-                window.draw(backgroundS);
+                window.draw(backG.getBackground());
                 // Draw the sprite
                 window.draw(bird.getBird());
 
@@ -179,7 +148,7 @@ int main()
                 bird.rotateBird("forward");
 
                 //Draw the backgroud Sprite
-                window.draw(backgroundS);
+                window.draw(backG.getBackground());
                 // Draw the sprite
                 window.draw(bird.getBird());
 
@@ -219,19 +188,11 @@ int main()
                 break;
             }
             default:{
-                //making the screen scroll by moving the background image horizontally
-                if(backScrollX < screenSize.x && !bird.getLifeDetector()) {
-                    backScrollX += moveSpeed;
-                }
-                else{
-                    backScrollX = 0;
-                }
+                //move background
+                backG.move(bird.getLifeDetector());
 
                 if(!bird.getLifeDetector()) bird.rotateBird("forward");
                 else bird.rotateBird("dead");
-
-                //set the position of the background texture on the moving sprite
-                backgroundS.setTextureRect(sf::IntRect(backScrollX,0,screenSize.x,screenSize.y));
 
                 //making the bird move up
                 if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up && tap && !bird.getLifeDetector() && bird.getY() > 0){
@@ -240,7 +201,7 @@ int main()
                     tap = false;
                 }
                 //temp gravity
-                else if(bird.getY() <= screenSize.y){
+                else if(bird.getY() <= screenSize.y && tap){
                     bird.moveBird(false);
                     bird.rotateBird("down");
                 }
@@ -249,13 +210,13 @@ int main()
                 if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Up && !bird.getLifeDetector() && !tap) tap = true;
 
                 //Draw the backgroud Sprite
-                window.draw(backgroundS);
+                window.draw(backG.getBackground());
 
                 //draw the pipes
                 for(unsigned i = 0; i < pi.getSize(); ++i){
                     //determine if the bird collided with the pipes using a tempPipe for proper sizing
                     sf::Sprite tempPipe;
-                    tempPipe.setTexture(pipeTexture);
+                    tempPipe.setScale(pi.getWidth(), pi.getHeight());
 
                     //change the positioning for the rotated pipes
                     if(i % 2 == 0) tempPipe.setPosition(pi.getPipesX(i) - pi.getWidth(), pi.getPipesY(i) - pi.getHeight());
@@ -285,23 +246,23 @@ int main()
                     }
 
                     //to set the score when player passes the pipes
-                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, tempWidth, tempHeight) && !pi.getPassedStats(i )&& !bird.getLifeDetector() && i % 2 == 0) {
+                    if(collisionCheck(bird.getBird(), bird.getWidth(), bird.getHeight(), tempPipe, tempWidth, tempHeight) && !pi.getPassedStats(i)&& !bird.getLifeDetector() && i % 2 == 0) {
                         pi.setPassedStats(i);
                         tempScore++; //set y to be the y point of the gap between pipes
                     }
 
                     //make it so that pipes off screen aren't drawn
-                    if(i % 2 == 0 && pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()){
+                    if(/*i%2==0*/pi.getPipesX(i) > -500 && pi.getPipesX(i) < 1000 && !bird.getLifeDetector()){
                         window.draw(pi.getPipes(-moveSpeed,i).x); //both moves the pipes and draws the new positions
-                        window.draw(pi.getPipes(2,i).y);//draw bottom pipe so there are two pipes per score zone
+                        //window.draw(pi.getPipes(0,i).y);//draw bottom pipe so there are two pipes per score zone
                     }
                     //still move pipes that are still needing to be drawn once the bird has "move forward" enough
-                    else if(i % 2 == 0 && pi.getPipesX(i) > 1000 && !bird.getLifeDetector())
+                    else if(/*i%2==0*/pi.getPipesX(i) >= 1000 && !bird.getLifeDetector())
                         pi.getPipes(-moveSpeed,i);
                     //bird is dead andd for transition
                     else {
                         window.draw(pi.getPipes(0,i).x);
-                        window.draw(pi.getPipes(0,i).y);
+                        //window.draw(pi.getPipes(0,i).y);
                     }
                 }
 
@@ -315,12 +276,11 @@ int main()
 
                 //to reset the game conditions may need to be changed
                 if(bird.getBird().getPosition().y >= screenSize.y){
-                    backgroundS.setTextureRect(sf::IntRect(0,0,screenSize.x,screenSize.y));
-                    pi.resetPipes(650, 401, pipeTexture);
-                    bird.resetBird(150,200,birdTexture);
+                    backG.reset();
+                    pi.resetPipes(650, 401);
+                    bird.resetBird(150,200);
                     bird.setScore(tempScore);
                     tap = false;
-                    backScrollX = 0;
                     gameState = 1;
                 }
 

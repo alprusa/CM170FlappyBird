@@ -9,9 +9,10 @@ using namespace std;
 class Buttons{
     private:
         sf::Sprite button;
+        sf::Texture buttonTexture;
         bool pressed;
     public:
-        Buttons(float xPos, float yPos, sf::Texture& bt);
+        Buttons(float xPos, float yPos, string btTexture);
         ~Buttons(){cout << "Buttons Gone" << endl;}
 
         void mouseClick(sf::RenderWindow& window);
