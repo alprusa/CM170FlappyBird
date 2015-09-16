@@ -82,6 +82,7 @@ int main()
     int gameState = 0; //for checking if playing the game at the menu or game over states
     int tempScore = 0; //score that will be incremented as the bird flys through pipes
     bool tap = true; //make it so player must tap to up arrow
+    bool regen = true;
 
 	// Start the game loop
     while (window.isOpen())
@@ -291,7 +292,11 @@ int main()
                 }
 
                 //to generate more pipes when player gets farther
-                //if(tempScore % 1000 == 0) pi.resetPipes(pi.getPipesX(tempScore)+50, 575, pipeTexture);
+                if(tempScore % 1000 == 0 && tempScore != 0 && regen) {
+                    pi.resetPipes(pi.getPipesX(tempScore)+200, 575);
+                    regen = false;
+                }
+                else if(tempScore % 1000 != 0 && !regen) regen = true;
 
                 break;
             }

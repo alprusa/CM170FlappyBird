@@ -7,7 +7,7 @@
 	<SFML/Audio.hpp>
 	<iostream>
 
-1442399611 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
+1442400251 source:/home/aprusa/Documents/FlappyBirds/FlappyBirds.cpp
 	<SFML/Graphics.hpp>
 	<SFML/Audio.hpp>
 	<sstream>
@@ -28,7 +28,7 @@
 	<SFML/Graphics.hpp>
 	<iostream>
 
-1442399491 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
+1442400558 source:/home/aprusa/Documents/FlappyBirds/PipesGenerator.cpp
 	"PipesGenerator.h"
 	"CollisionDetection.h"
 

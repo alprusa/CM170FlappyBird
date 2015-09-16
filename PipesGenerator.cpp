@@ -170,3 +170,4 @@ sf::Sprite Pipes::getPipes(float speed, int index){
 //fix the scroll look make it smooth
 //fix moving pipes section
 //get moving pipes working
+//setOrigin for the sprites
